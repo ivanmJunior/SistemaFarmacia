@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui" template="/templates/layout.xhtml">
+
+	<ui:define name="menu">
+		<ui:include src="/includes/menu.xhtml" />
+	</ui:define>
+
+	<ui:define name="conteudo">
+
+		<h:form id="frmFornecedor">
+			<p:dataTable id="tbFornecedor" widgetVar="tabelaFornecedores"
+				emptyMessage="Nenhum registro encontrado"
+				value="#{MBFornecedores.listaFornecedores}" var="itemLista"
+				filteredValue="#{MBFornecedores.listaFornecedoresFiltrados}" paginator="true" rows="8">
+
+				<f:facet name="header">Lista de Fornecedeores</f:facet>
+
+				<p:column headerText="Codigo" sortBy="#{itemLista.codigo}"
+					filterBy="#{itemLista.codigo}">
+					<h:outputText value="#{itemLista.codigo}" />
+				</p:column>
+
+				<p:column headerText="Nome" sortBy="#{itemLista.nome}"
+					filterBy="#{itemLista.nome}">
+					<h:outputText value="#{itemLista.nome}"/>
+				</p:column>
+
+				<p:column headerText="Eliminado" sortBy="#{itemLista.eliminado}">
+					<h:outputText value="#{itemLista.eliminado}" />
+				</p:column>
+				
+				<p:column headerText="Opções de Controle">
+					<p:commandButton icon="ui-icon-trash"
+						oncomplete="PF('dlgExcluirFornecedor').show();"
+						update=":frmExcluirFornecedor:pngExcluirFornecedor">
+						<f:setPropertyActionListener value="#{itemLista}" target="#{MBFornecedores.fornecedor}"></f:setPropertyActionListener>
+					</p:commandButton>
+					<p:commandButton icon="ui-icon-pencil"
+						oncomplete="PF('dlgEditarFornecedor').show();"
+						update=":frmEditarFornecedor:pngEditarFornecedor">
+						<f:setPropertyActionListener value="#{itemLista}" target="#{MBFornecedores.fornecedor}"></f:setPropertyActionListener>
+					</p:commandButton>
+						
+				</p:column>
+
+				<f:facet name="footer">
+					<p:commandButton icon="ui-icon-plusthick" value="Novo"
+						actionListener="#{MBFornecedores.prepararNovo}"
+						oncomplete="PF('dlgNovoFornecedor').show();"
+						update=":frmNovoFornecedor:pngNovoFornecedor" />
+
+				</f:facet>
+			</p:dataTable>
+		</h:form>
+		<p:dialog header="Cadastrar Fornecedor" widgetVar="dlgNovoFornecedor"
+			closable="false" draggable="false" resizable="false" modal="true"
+			appendTo="@(body)">
+
+			<h:form id="frmNovoFornecedor">
+
+				<h:panelGrid id="pngNovoFornecedor" columns="2">
+					<p:outputLabel value="Descrição:" for="txtDescricaNovoFornecedor"/>
+					<h:inputText size="30" maxlength="50" id="txtDescricaNovoFornecedor"
+						value="#{MBFornecedores.fornecedor.nome}" required="true"
+						requiredMessage="Campo não pode ser vazio!"/>
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton icon="ui-icon-check" value="Salvar"
+						actionListener="#{MBFornecedores.novoFornecedor}"
+						oncomplete="verificar(xhr, status, args, 'dlgNovoFornecedor', 'tabelaFornecedores');"
+						update=":frmFornecedor:tbFornecedor :msgGlobal" />
+
+					<p:commandButton icon="ui-icon-closethick" value="Cancelar"
+						process="@this"
+						onclick="PF('dlgNovoFornecedor').hide(); PF('tabelaFornecedores').clearFilters();"
+						update=":frmNovoFornecedor:pngNovoFornecedor" />
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+		<p:dialog header="Excluir Fornecedor" widgetVar="dlgExcluirFornecedor"
+			closable="false" draggable="false" resizable="false" modal="true"
+			appendTo="@(body)">
+
+			<h:form id="frmExcluirFornecedor">
+
+				<h:panelGrid id="pngExcluirFornecedor" columns="2">
+					<h:outputText value="Código:" />
+					<h:outputText value="#{MBFornecedores.fornecedor.codigo}" />
+					
+					<h:outputText value="Nome:" />
+					<h:outputText value="#{MBFornecedores.fornecedor.nome}" />
+					
+					<h:outputText value="Eliminado:" />
+					<h:outputText value="#{MBFornecedores.fornecedor.eliminado}" />
+				</h:panelGrid>
+				
+				<h:panelGrid columns="2">
+					<p:commandButton icon="ui-icon-check" value="Excluir"
+						actionListener="#{MBFornecedores.excluirFornecedor}"
+						oncomplete="PF('dlgExcluirFornecedor').hide(); PF('tabelaFornecedores').clearFilters();"
+						update=":frmFornecedor:tbFornecedor :msgGlobal" />
+
+					<p:commandButton icon="ui-icon-closethick" value="Cancelar"
+						onclick="PF('dlgExcluirFornecedor').hide(); PF('tabelaFornecedores').clearFilters();"
+						update=":frmExcluirFornecedor:pngExcluirFornecedor" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog header="Editar Fornecedor" widgetVar="dlgEditarFornecedor"
+			closable="false" draggable="false" resizable="false" modal="true"
+			appendTo="@(body)">
+
+			<h:form id="frmEditarFornecedor">
+
+				<h:panelGrid id="pngEditarFornecedor" columns="2">
+					<h:outputText value="Código:" />
+					<h:outputText value="#{MBFornecedores.fornecedor.codigo}" />
+					
+					<p:outputLabel value="Nome:" for="txtDescricaNovoFornecedor"/>
+					<h:inputText id="txtDescricaNovoFornecedor" value="#{MBFornecedores.fornecedor.nome}"
+					required="true" requiredMessage="Campo Nome não pode ser vazio!"/>
+					
+					<h:outputText value="Eliminado:" />
+					<h:outputText value="#{MBFornecedores.fornecedor.eliminado}" />
+				</h:panelGrid>
+				
+				<h:panelGrid columns="2">
+					<p:commandButton icon="ui-icon-pencil" value="Editar"
+						actionListener="#{MBFornecedores.editarFornecedor}"
+						oncomplete="verificar(xhr, status, args, 'dlgEditarFornecedor', 'tabelaFornecedores')"
+						update=":frmFornecedor:tbFornecedor :msgGlobal" />
+
+					<p:commandButton icon="ui-icon-closethick" value="Cancelar"
+						process="@this"
+						onclick="PF('dlgEditarFornecedor').hide(); PF('tabelaFornecedores').clearFilters();"
+						update=":frmEditarFornecedor:pngEditarFornecedor" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+
+	</ui:define>
+
+</ui:composition>
